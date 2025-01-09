@@ -33,7 +33,7 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
 
-        .calculator input[type="number"] {
+        .calculator input[type="number"], .calculator select {
             width: 90%;
             padding: 12px;
             border-radius: 10px;
@@ -44,7 +44,7 @@
             transition: box-shadow 0.3s ease;
         }
 
-        .calculator input[type="number"]:focus {
+        .calculator input[type="number"]:focus, .calculator select:focus {
             outline: none;
             box-shadow: 0 0 10px #66c0f4;
         }
@@ -96,6 +96,10 @@
     <div class="calculator">
         <img src="https://cdn2.steamgriddb.com/logo_thumb/5a370ab3360fc98865faf5190a306499.png" alt="Steam Deck Logo">
         <h1>Battery Calculator</h1>
+        <select id="screenType">
+            <option value="40">LCD (40Wh)</option>
+            <option value="50">OLED (50Wh)</option>
+        </select>
         <input type="number" id="usage" placeholder="Enter usage (W)">
         <button onclick="calculateBatteryLife()">Calculate</button>
         <div class="result" id="result"></div>
@@ -106,7 +110,7 @@
 
     <script>
         function calculateBatteryLife() {
-            const batteryCapacity = 40; // in Wh
+            const batteryCapacity = parseFloat(document.getElementById('screenType').value); // Get selected battery capacity
             const usage = parseFloat(document.getElementById('usage').value);
 
             if (!usage || usage <= 0) {
