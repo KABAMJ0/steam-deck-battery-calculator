@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Deck Battery Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1b2838; /* Steam dark blue */
+            color: #c7d5e0; /* Steam light blue */
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .calculator {
+            background-color: #2a475e; /* Steam lighter blue */
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            width: 300px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .calculator:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .calculator input[type="number"] {
+            width: 90%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            margin-bottom: 20px;
+            font-size: 16px;
+            text-align: center;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .calculator input[type="number"]:focus {
+            outline: none;
+            box-shadow: 0 0 10px #66c0f4;
+        }
+
+        .calculator button {
+            background-color: #66c0f4; /* Steam button blue */
+            color: #1b2838; /* Steam dark blue */
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .calculator button:hover {
+            background-color: #8abbd3;
+            transform: translateY(-3px);
+        }
+
+        .calculator button:active {
+            transform: translateY(1px);
+        }
+
+        .calculator .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .calculator img {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #8f98a0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <img src="https://cdn2.steamgriddb.com/logo_thumb/5a370ab3360fc98865faf5190a306499.png" alt="Steam Deck Logo">
+        <h1>Battery Calculator</h1>
+        <input type="number" id="usage" placeholder="Enter usage (W)">
+        <button onclick="calculateBatteryLife()">Calculate</button>
+        <div class="result" id="result"></div>
+        <div class="footer">
+            &copy; Kabamjo 2024. Not associated with Steam, Valve, or Steam Deck. Copyright for the logo belongs to Valve.
+        </div>
+    </div>
+
+    <script>
+        function calculateBatteryLife() {
+            const batteryCapacity = 40; // in Wh
+            const usage = parseFloat(document.getElementById('usage').value);
+
+            if (!usage || usage <= 0) {
+                document.getElementById('result').innerText = "Please enter a valid usage.";
+                return;
+            }
+
+            const batteryLife = (batteryCapacity / usage).toFixed(2); // Calculate hours
+            document.getElementById('result').innerText = `Battery Life: ${batteryLife} hours`;
+        }
+    </script>
+</body>
+</html>
