@@ -13,7 +13,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
             height: 100vh;
             overflow: hidden;
         }
@@ -25,198 +24,102 @@
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
             text-align: center;
             width: 300px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
-            margin-top: 20px;
         }
 
-        .calculator input[type="number"], .calculator input[type="text"], .calculator select {
+        .calculator:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .calculator input[type="number"], .calculator select {
             width: 90%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: none;
+            padding: 12px;
             border-radius: 10px;
+            border: none;
+            margin-bottom: 20px;
             font-size: 16px;
             text-align: center;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .calculator input[type="number"]:focus, .calculator select:focus {
+            outline: none;
+            box-shadow: 0 0 10px #66c0f4;
         }
 
         .calculator button {
             background-color: #66c0f4; /* Steam button blue */
             color: #1b2838; /* Steam dark blue */
             border: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 10px;
             font-size: 16px;
             cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        .result {
+        .calculator button:hover {
+            background-color: #8abbd3;
+            transform: translateY(-3px);
+        }
+
+        .calculator button:active {
+            transform: translateY(1px);
+        }
+
+        .calculator .result {
             margin-top: 20px;
             font-size: 18px;
+            font-weight: bold;
+        }
+
+        .calculator img {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
         }
 
         .footer {
             margin-top: 20px;
             font-size: 12px;
             color: #8f98a0;
-        }
-
-        .search-results {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            background-color: #fff;
-            color: #000;
-            border-radius: 5px;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .search-result-item {
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .search-result-item:hover {
-            background-color: #f0f0f0;
-        }
-
-        /* Loading spinner style */
-        #loadingSpinner {
-            margin-top: 20px;
-            display: none;
-        }
-
-        /* Positioning for search bar at the top */
-        #searchContainer {
-            width: 100%;
-            padding: 10px;
             text-align: center;
         }
     </style>
 </head>
 <body>
-    <!-- Search bar at the top -->
-    <div id="searchContainer">
-        <input type="text" id="searchGame" placeholder="Search for a game" oninput="debouncedSearch()">
-        <div id="searchResults" class="search-results"></div>
-        <div id="loadingSpinner">Loading games... Please wait.</div>
-    </div>
-
-    <!-- Calculator container -->
     <div class="calculator">
+        <img src="https://cdn2.steamgriddb.com/logo_thumb/5a370ab3360fc98865faf5190a306499.png" alt="Steam Deck Logo">
         <h1>Battery Calculator</h1>
-        <input type="number" id="gamePower" placeholder="Power Draw (W)">
-        <div>
-            <label for="screenType">Select Screen Type:</label>
-            <select id="screenType">
-                <option value="40">LCD (40Wh)</option>
-                <option value="50">OLED (50Wh)</option>
-            </select>
-        </div>
+        <select id="screenType">
+            <option value="40">LCD (40Wh)</option>
+            <option value="50">OLED (50Wh)</option>
+        </select>
+        <input type="number" id="usage" placeholder="Enter usage (W)">
         <button onclick="calculateBatteryLife()">Calculate</button>
         <div class="result" id="result"></div>
-        <div class="footer">&copy; Kabamjo 2024. Not associated with Steam or Valve.</div>
+        <div class="footer">
+            &copy; Kabamjo 2024. Not associated with Steam, Valve, or Steam Deck. Copyright for the logo belongs to Valve.
+        </div>
     </div>
 
     <script>
-        let isDataLoaded = false;
-        let timeoutId = null; // To store the debounced timeout ID
-
-        // Debounce function to delay the API call
-        function debouncedSearch() {
-            clearTimeout(timeoutId); // Clear previous timeout if typing continues
-            timeoutId = setTimeout(() => {
-                searchGames(); // Call the search function after a delay
-            }, 500); // Wait for 500ms after typing stops
-        }
-
-        // Fetch Steam game list from API
-        async function loadGames() {
-            const resultsContainer = document.getElementById('searchResults');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            loadingSpinner.style.display = 'block';  // Show loading message
-
-            const apiUrl = `https://api.steampowered.com/ISteamApps/GetAppList/v2/`;
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'GET', // Ensure using GET method
-                    headers: {
-                        'Cache-Control': 'no-cache',  // Disable cache to ensure fresh data
-                        'Accept': 'application/json',  // Explicitly accept JSON
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                const games = data.applist.apps;
-
-                // Store the games list globally for search
-                window.games = games;
-                isDataLoaded = true;
-
-                // Hide the loading spinner
-                loadingSpinner.style.display = 'none';
-
-            } catch (error) {
-                console.error("Error fetching Steam games:", error);
-                alert("Failed to fetch Steam games.");
-                loadingSpinner.style.display = 'none';
-            }
-        }
-
-        // Search games based on input
-        async function searchGames() {
-            const query = document.getElementById('searchGame').value.trim();
-            const resultsContainer = document.getElementById('searchResults');
-
-            if (!isDataLoaded) {
-                await loadGames();  // Load games if not already done
-            }
-
-            if (query.length < 3) {
-                resultsContainer.style.display = 'none';
-                return;
-            }
-
-            // Filter games by search query
-            const filteredGames = window.games.filter(game =>
-                game.name.toLowerCase().includes(query.toLowerCase())
-            );
-
-            if (filteredGames.length > 0) {
-                resultsContainer.innerHTML = filteredGames.map(game =>
-                    `<div class="search-result-item" onclick="selectGame('${game.name}')">${game.name}</div>`
-                ).join('');
-                resultsContainer.style.display = 'block';
-            } else {
-                resultsContainer.style.display = 'none';
-            }
-        }
-
-        // Select a game from the search results
-        function selectGame(gameName) {
-            document.getElementById('searchGame').value = gameName;
-            document.getElementById('searchResults').style.display = 'none';
-            document.getElementById('gamePower').focus(); // Focus the power input field
-        }
-
-        // Calculate battery life based on power usage and screen type
         function calculateBatteryLife() {
-            const usage = parseFloat(document.getElementById('gamePower').value);
-            const screenType = document.getElementById('screenType').value;
+            const batteryCapacity = parseFloat(document.getElementById('screenType').value); // Get selected battery capacity
+            const usage = parseFloat(document.getElementById('usage').value);
 
             if (!usage || usage <= 0) {
-                document.getElementById('result').textContent = "Please enter a valid power draw.";
+                document.getElementById('result').innerText = "Please enter a valid usage.";
                 return;
             }
 
-            const batteryCapacity = parseFloat(screenType); // Based on selected screen type
-            const batteryLife = (batteryCapacity / usage).toFixed(2); // Hours
-            document.getElementById('result').textContent = `Battery Life: ${batteryLife} hours`;
+            const batteryLife = (batteryCapacity / usage).toFixed(2); // Calculate hours
+            document.getElementById('result').innerText = `Battery Life: ${batteryLife} hours`;
         }
     </script>
 </body>
